@@ -1,11 +1,12 @@
 """Campaign Intelligence — refined Streamlit portfolio dashboard.
 
 The public dashboard uses published synthetic CSV exports. Run locally with:
-    python -m streamlit run app_v4_refined.py --server.port 8503
+    python -m streamlit run app.py --server.port 8503
 
 For Streamlit Community Cloud, save this file as app.py at the repository root.
 """
 from pathlib import Path
+from html import escape
 
 import pandas as pd
 import plotly.express as px
@@ -139,6 +140,29 @@ st.markdown(
       .ci-small-note { font-size:.83rem; color:#576E7C; }
       .ci-question-kicker { color:#087F79; font-size:.72rem; letter-spacing:.12em; font-weight:800; border-top:1px solid #D6E6E9; padding-top:13px; margin-top:5px; }
       .ci-question-title {font-weight:760; color:#152C3A; font-size:1rem; padding-top:7px;}
+      .ci-check-table { width:100%; border-collapse:separate; border-spacing:0; background:#FFF;
+          border:1px solid #D8E5ED; border-radius:8px; overflow:hidden; font-size:.92rem; }
+      .ci-check-table th { text-align:left; background:#EAF3F5; color:#173647; font-weight:750;
+          padding:12px 14px; border-bottom:1px solid #D8E5ED; }
+      .ci-check-table td { padding:12px 14px; border-bottom:1px solid #E4EDF1; vertical-align:top;
+          line-height:1.5; color:#213949; }
+      .ci-check-table tr:last-child td { border-bottom:0; }
+      .ci-check-table th:nth-child(1) { width:28%; }
+      .ci-check-table th:nth-child(2) { width:49%; }
+      .ci-check-table th:nth-child(3) { width:10%; }
+      .ci-check-table th:nth-child(4) { width:13%; }
+      .ci-pass { color:#056F63; font-weight:750; }
+      .ci-review { color:#B04436; font-weight:750; }
+      .ci-check-wrap { overflow-x:auto; margin: 0 0 10px; }
+      .ci-check-table { min-width:700px; }
+      .st-key-next_campaign_links button { background:transparent !important; color:#087F79 !important;
+          border:0 !important; padding:4px 0 !important; font-weight:750 !important;
+          box-shadow:none !important; }
+      .st-key-next_campaign_links button:hover { color:#064F4B !important; text-decoration:underline !important; }
+      section[data-testid="stSidebar"] .st-key-data_guide_btn button {
+          background:transparent !important; border:0 !important; color:#79E3CE !important;
+          padding-left:0 !important; font-weight:700 !important; }
+      section[data-testid="stSidebar"] .st-key-data_guide_btn button:hover { text-decoration:underline !important; }
       @media(max-width:1150px) {
         .ci-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       }
@@ -185,6 +209,10 @@ monthly_channel = load_data("monthly_channel_spend.csv")
 audience = load_data("audience_reconciliation.csv")
 segment_file = DATA_DIR / "segment_value_contactability.csv"
 segment_values = load_data(segment_file.name) if segment_file.is_file() else None
+lift_file = DATA_DIR / "campaign_decision_queue.csv"
+lift_data = load_data(lift_file.name) if lift_file.is_file() else None
+opportunity_file = DATA_DIR / "customer_opportunity_review.csv"
+opportunity_data = load_data(opportunity_file.name) if opportunity_file.is_file() else None
 
 monthly["campaign_month"] = pd.to_datetime(monthly["campaign_month"])
 monthly_channel["campaign_month"] = pd.to_datetime(monthly_channel["campaign_month"])
@@ -227,6 +255,119 @@ def section(title, subtitle, eyebrow):
     st.caption(subtitle)
 
 
+def navigate_to(destination):
+    """Change an existing radio page from a real Streamlit button click."""
+    st.session_state["workspace_page"] = destination
+
+
+@st.dialog("What these numbers mean", width="large")
+def show_data_guide():
+    st.caption("Methodology, definitions and limitations for this synthetic portfolio.")
+    st.markdown("### Source and scope")
+    st.write(
+        "The Streamlit dashboard reads published CSV exports generated from campaign_analytics.db. "
+        "It demonstrates simulated customer and campaign activity, not a real business case. "
+        "Monetary values use '$'; the source does not specify a currency. Campaign cost and "
+        "audience metrics use campaign start dates. The original companion website's customer "
+        "segments use all purchase history through 31 August 2025."
+    )
+    st.markdown("### Audience and reconciliation")
+    st.write(
+        "A candidate is one customer considered for one campaign. Counts across campaigns "
+        "are customer–campaign records, not unique people. Eligible = recorded sent + control "
+        "holdout. Suppressions use the recorded first exclusion reason. 'Sent' is a send record, "
+        "not proof of inbox delivery or an ad impression. The original project's send-level "
+        "reconciliation compares approved customer–campaign pairs with send records and checks "
+        "duplicates; the six checks on this dashboard do not independently rerun that audit."
+    )
+    st.markdown("### Observed conversion lift")
+    st.write(
+        "In the original analysis, conversion means at least one order between campaign start "
+        "and start + 10 days, inclusive (11 calendar dates), for sent and holdout groups. "
+        "Lift is the difference in conversion rates, in percentage points (pp). Campaign "
+        "intervals use a 95% Newcombe interval based on Wilson bounds. An exploratory positive "
+        "signal requires a lower interval bound above zero and at least 30 holdouts. These are "
+        "unadjusted comparisons across many campaigns, not a new experiment run in Streamlit."
+    )
+    st.write(
+        "Customers may appear in several campaigns or receive another campaign while held "
+        "out. Sends occur up to three days after campaign start. Therefore observed lift is "
+        "not proof of isolated causal impact. Portfolio-wide rates are descriptive pooled "
+        "comparisons; no pooled confidence interval is claimed."
+    )
+    st.markdown("### Attribution and return")
+    st.write(
+        "In the original companion website, first-touch, last-touch and linear attribution "
+        "allocate each order's revenue to recorded campaign sends in the prior 25 days, "
+        "inclusive. Same-day first or last touches split credit equally; linear credit is "
+        "shared across all eligible sends. These are send-based proxies, not click-based "
+        "attribution. Full-journey credit is assigned before campaign filters are applied."
+    )
+    st.write(
+        "Attributed ROAS = attributed revenue ÷ campaign cost. The current Streamlit Overview "
+        "uses a DIFFERENT metric: campaign-tagged revenue ÷ recorded campaign cost. Do not "
+        "interchange those two revenue figures or ROAS measures. Neither is profit nor "
+        "incremental return. A 1.00× ratio recovers campaign cost in revenue before product "
+        "costs. Orders with no qualifying send remain unattributed in the original model; "
+        "campaign-tagged revenue is not causal ground truth."
+    )
+    st.markdown("### Customer priorities")
+    st.write(
+        "The original RFM analysis scores recency, purchase count and monetary value with "
+        "NTILE(5), using customer ID as a deterministic tie-break. Higher scores indicate "
+        "stronger historical behaviour. Equal values can fall into different tiles. Segment "
+        "rules use recency and frequency; monetary value is reported separately. Customers "
+        "without purchases appear separately. Segment labels are descriptive, not predicted "
+        "future value. Contactability counts are not a substitute for live eligibility checks."
+    )
+    st.markdown("### Dashboard metric glossary")
+    st.markdown(
+        "- **Recorded campaign cost:** Cost stored against a campaign. Grouping by launch "
+        "month does not show daily cash spending or budget pacing.\n"
+        "- **Campaign-tagged revenue:** Revenue linked to a campaign ID in the source data; "
+        "not proof the campaign caused the order.\n"
+        "- **Tagged orders:** Orders associated with a campaign ID; not necessarily new customers.\n"
+        "- **Cost per tagged order:** Recorded campaign cost ÷ tagged orders; not customer "
+        "acquisition cost (CAC).\n"
+        "- **ROAS:** Revenue ÷ campaign cost. The Overview uses tagged ROAS; the original "
+        "attribution page uses attributed ROAS.\n"
+        "- **Illustrative target:** A comparison marker of 1.00×; not a profit threshold.\n"
+        "- **Completed:** Recorded end date precedes the reporting date, not a verified "
+        "delivery or commercial-success status.\n"
+        "- **PASS / REVIEW:** A specified validation result under a stated tolerance; "
+        "not certification of the entire database.\n"
+        "- **Data-quality difference:** Absolute difference between the two quantities "
+        "compared; 0.0046 in the unit-cost check is below half a cent of display rounding."
+    )
+    st.markdown("### Simulation limitations")
+    st.write(
+        "The generator applies email consent to non-SMS channels and a shared "
+        "contact-frequency limit, with channels processed sequentially. This can affect "
+        "channel comparisons. It includes people not yet signed up in candidate pools. "
+        "Results demonstrate analytical methods and hypotheses to test, not an instruction "
+        "to launch a live campaign or increase spending."
+    )
+    st.info(
+        "Scope distinction: the present Streamlit app shows campaign-tagged outcomes, "
+        "CSV-based audience views and aggregate QA; the original companion website also "
+        "contains first/last/linear attribution and its own exploratory incrementality "
+        "analysis. The new Observed lift page below displays exported estimates, not a "
+        "new randomised trial."
+    )
+    st.link_button("Open original Campaign Intelligence methods ↗",
+                   "https://anna-campaign-intelligence.huongzuru.chatgpt.site/")
+
+
+NAV_PAGES = [
+    "01  Overview", "02  Trend", "03  Channel economics",
+    "04  Audience & eligibility", "05  Customer priorities",
+    "06  Observed lift", "07  Data quality",
+]
+# Migrate the previous navigation value when this version is first loaded.
+if st.session_state.get("workspace_page") == "05  Data quality":
+    st.session_state["workspace_page"] = "07  Data quality"
+
+
 with st.sidebar:
     st.markdown(
         '<div class="ci-side-brand"><span>▥</span> CAMPAIGN INTELLIGENCE</div>',
@@ -237,7 +378,7 @@ with st.sidebar:
     st.markdown("**DECISION WORKSPACE**")
     page = st.radio(
         "Decision workspace",
-        ["01  Overview", "02  Trend", "03  Channel economics", "04  Audience & eligibility", "05  Data quality"],
+        NAV_PAGES,
         label_visibility="collapsed", key="workspace_page",
     )
     st.markdown('<div class="ci-sidebar-rule"></div>', unsafe_allow_html=True)
@@ -251,6 +392,8 @@ with st.sidebar:
     st.caption("SYNTHETIC PORTFOLIO DATA")
     st.caption("Historical campaign starts: Jan 2024–Jul 2025")
     st.caption("Tagged revenue is not causal incremental revenue.")
+    if st.button("How to read the data ↗", key="data_guide_btn", type="tertiary"):
+        show_data_guide()
 
 st.markdown(
     '<div class="ci-topbar">'
@@ -268,6 +411,8 @@ if page == "01  Overview":
         "The business view",
     )
     st.caption("All 112 campaigns · Historical portfolio · Synthetic data · Campaign starts Jan 2024–Jul 2025")
+    if st.button("How to read the data ↗", key="overview_data_guide", type="tertiary"):
+        show_data_guide()
     st.markdown(
         '<div class="ci-kpi-grid">'
         f'<div class="ci-kpi-card"><div class="ci-kpi-label">Campaigns</div>'
@@ -373,9 +518,6 @@ if page == "01  Overview":
     largest_reason, largest_count = max(reason_totals.items(), key=lambda item: item[1])
     reason_pct = 100 * largest_count / suppressed if suppressed else 0
 
-    def open_audience_page():
-        st.session_state["workspace_page"] = "04  Audience & eligibility"
-
     with st.container(border=True):
         st.markdown('<div class="ci-panel-mark">BEFORE THE SEND</div>', unsafe_allow_html=True)
         st.subheader("How much of the audience can we reach?")
@@ -395,7 +537,8 @@ if page == "01  Overview":
         st.caption("Eligible = recorded sent + holdout. A send record does not confirm delivery; repeated customers count once per campaign.")
         if cand != audience_total:
             st.warning(f"Audience totals do not reconcile: candidates {cand:,}; outcomes {audience_total:,}.")
-        st.button("Inspect audience & exclusions →", key="overview_audience_link", on_click=open_audience_page)
+        st.button("Review audience →", key="overview_audience_link", type="tertiary",
+                  on_click=navigate_to, args=("04  Audience & eligibility",))
 
     st.markdown(" ")
     with st.container(border=True):
@@ -422,6 +565,19 @@ if page == "01  Overview":
             st.markdown('<div class="ci-question-kicker">03 / ADDITIONAL PURCHASES</div>', unsafe_allow_html=True)
             st.markdown('<div class="ci-question-title">Look beyond credited sales</div>', unsafe_allow_html=True)
             st.write("Compare sent and holdout conversion rates, sample sizes and uncertainty before treating tagged sales as evidence of additional purchases.")
+        # A separate row ensures the three links share the same baseline, even if
+        # question descriptions wrap onto different numbers of lines.
+        with st.container(key="next_campaign_links"):
+            link1, link2, link3 = st.columns(3, gap="large")
+            with link1:
+                st.button("Review audience →", key="next_audience", type="tertiary",
+                          on_click=navigate_to, args=("04  Audience & eligibility",))
+            with link2:
+                st.button("Explore customer priorities →", key="next_customer", type="tertiary",
+                          on_click=navigate_to, args=("05  Customer priorities",))
+            with link3:
+                st.button("Examine observed lift →", key="next_lift", type="tertiary",
+                          on_click=navigate_to, args=("06  Observed lift",))
 
     with st.container(border=True):
         st.markdown('<div class="ci-panel-mark">PORTFOLIO FINANCIALS</div>', unsafe_allow_html=True)
@@ -436,7 +592,7 @@ if page == "01  Overview":
         fig = px.bar(
             finance, x="channel", y="Amount", color="Metric", barmode="group",
             color_discrete_map={"Recorded cost": NAVY, "Tagged revenue": TEAL},
-            labels={"channel": "Channel", "Amount": "USD"},
+            labels={"channel": "Channel", "Amount": "Amount ($; currency unspecified)"},
         )
         fig.update_yaxes(tickprefix="$", tickformat=",.0f")
         fig.update_layout(legend=dict(orientation="h", y=1.09, x=0))
@@ -540,7 +696,7 @@ elif page == "03  Channel economics":
     fig = px.bar(
         finance_view, x="channel", y="Amount", color="Metric", barmode="group",
         color_discrete_map={"Recorded cost": NAVY, "Tagged revenue": TEAL},
-        labels={"channel": "Channel", "Amount": "USD"},
+        labels={"channel": "Channel", "Amount": "Amount ($; currency unspecified)"},
     )
     fig.update_layout(legend=dict(orientation="h", y=1.12, x=0))
     fig.update_yaxes(tickprefix="$", tickformat=",.0f")
@@ -721,29 +877,144 @@ elif page == "04  Audience & eligibility":
         "nor do they establish consent compliance at send time."
     )
 
-elif page == "05  Data quality":
+elif page == "05  Customer priorities":
+    section(
+        "Who should we nurture or win back?",
+        "Understand historical customer value before proposing a new audience or contact strategy.",
+        "Customer priorities",
+    )
+    st.info("Historical segments are hypotheses for future tests, not an approved send list. Refresh consent, eligibility and contact history before activation.")
+    if segment_values is None:
+        st.warning("The segment_value_contactability.csv export is not available. Add it to powerbi_exports to view this page.")
+    else:
+        sv = segment_values.copy()
+        number_fields = ["customers", "segment_revenue", "revenue_share_pct", "customer_share_pct",
+                         "email_contactable_customers", "sms_contactable_customers"]
+        for field in number_fields:
+            if field in sv.columns:
+                sv[field] = pd.to_numeric(sv[field], errors="coerce").fillna(0)
+        for field in ("customer_share_pct", "revenue_share_pct"):
+            if field in sv.columns and sv[field].abs().max() <= 1.0001:
+                sv[field] = sv[field] * 100
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Segmented historical buyers", f"{int(sv['customers'].sum()):,}")
+        c2.metric("Historical segment revenue", money(float(sv['segment_revenue'].sum())))
+        c3.metric("Segments", f"{len(sv)}")
+        st.caption("Only customers in exported segments are counted above; this does not necessarily equal the entire customer base.")
+        share = sv.melt(id_vars="segment", value_vars=["customer_share_pct", "revenue_share_pct"],
+                        var_name="Measure", value_name="Percent")
+        share["Measure"] = share["Measure"].replace({
+            "customer_share_pct": "Share of buyers", "revenue_share_pct": "Share of historical revenue"})
+        fig = px.bar(share, y="segment", x="Percent", color="Measure", barmode="group",
+                     orientation="h", color_discrete_map={"Share of buyers": "#A8BFCD",
+                                                                "Share of historical revenue": TEAL},
+                     labels={"segment": "Segment", "Percent": "Share (%)"})
+        fig.update_xaxes(ticksuffix="%")
+        st.subheader("Customer share versus historical revenue share")
+        st.plotly_chart(chart_style(fig, 420), width="stretch")
+        cols = [c for c in ["segment", "customers", "segment_revenue", "customer_share_pct",
+                            "revenue_share_pct", "email_contactable_customers", "sms_contactable_customers"]
+                if c in sv.columns]
+        st.subheader("Segment contactability summary")
+        st.dataframe(sv[cols], hide_index=True, width="stretch")
+        st.caption("Contactability counts are a historical indicator, not final approval to contact a customer.")
+        if opportunity_data is not None:
+            with st.expander("Review synthetic customer opportunities"):
+                st.dataframe(opportunity_data, hide_index=True, width="stretch")
+
+elif page == "06  Observed lift":
+    section(
+        "Would those purchases have happened anyway?",
+        "Review exploratory sent-versus-holdout estimates before interpreting tagged revenue as additional sales.",
+        "Campaign effectiveness",
+    )
+    st.warning("This page reads precomputed historical estimates, not the result of a new randomised Email reallocation test. Overlapping campaign exposure and unadjusted comparisons limit causal interpretation.")
+    if lift_data is None:
+        st.warning("The campaign_decision_queue.csv export is not available. Add it to powerbi_exports to view this page.")
+    else:
+        lv = lift_data.copy()
+        numeric_fields = ["estimated_lift_pp", "lift_ci_lower_pp", "lift_ci_upper_pp", "treated_n",
+                          "treated_conversions", "control_n", "control_conversions"]
+        for field in numeric_fields:
+            lv[field] = pd.to_numeric(lv[field], errors="coerce")
+        available = lv.dropna(subset=["estimated_lift_pp", "lift_ci_lower_pp", "lift_ci_upper_pp", "control_n"]).copy()
+        available["Signal"] = available.apply(
+            lambda r: "Exploratory positive signal" if r["control_n"] >= 30 and r["lift_ci_lower_pp"] > 0
+            else "Inconclusive / review", axis=1)
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Campaigns in export", f"{len(lv):,}")
+        m2.metric("Estimates with intervals", f"{len(available):,}")
+        m3.metric("Exploratory positive signals",
+                  f"{int((available['Signal'] == 'Exploratory positive signal').sum()):,}")
+        selected_lift_channel = st.selectbox("Channel", ["All channels"] + sorted(available["channel"].dropna().unique().tolist()), key="lift_filter_channel")
+        if selected_lift_channel != "All channels":
+            available = available[available["channel"] == selected_lift_channel].copy()
+        st.subheader("Estimated conversion-rate difference and 95% interval")
+        st.caption("Percentage points (pp). The interval crossing zero is not evidence of a positive difference at this exploratory threshold.")
+        display = available.sort_values("estimated_lift_pp", ascending=False).head(12).copy()
+        if display.empty:
+            st.info("No comparable campaign estimates for the selected channel.")
+        else:
+            display = display.sort_values("estimated_lift_pp", ascending=True)
+            fig = go.Figure()
+            for row in display.itertuples(index=False):
+                label = f"#{int(row.campaign_id)} · {row.channel}"
+                lower, middle, upper = float(row.lift_ci_lower_pp), float(row.estimated_lift_pp), float(row.lift_ci_upper_pp)
+                color = TEAL if row.Signal == "Exploratory positive signal" else "#8199AA"
+                fig.add_trace(go.Scatter(
+                    x=[lower, upper], y=[label, label], mode="lines", line=dict(color=color, width=4),
+                    showlegend=False, hoverinfo="skip"))
+                fig.add_trace(go.Scatter(
+                    x=[middle], y=[label], mode="markers", marker=dict(color=color, size=10),
+                    showlegend=False, hovertemplate=f"{label}<br>Estimated lift: {middle:+.2f} pp<br>95% interval: [{lower:.2f}, {upper:.2f}] pp<extra></extra>"))
+            fig.add_vline(x=0, line_dash="dash", line_color="#8499A8")
+            fig.update_layout(xaxis_title="Observed conversion-rate difference (pp)", yaxis_title="",
+                              margin=dict(l=130, r=20, t=35, b=45))
+            st.plotly_chart(chart_style(fig, max(360, len(display)*35)), width="stretch")
+        st.subheader("Campaign-level evidence")
+        evidence_cols = ["campaign_id", "campaign_name", "channel", "treated_n", "treated_conversions",
+                         "control_n", "control_conversions", "estimated_lift_pp", "lift_ci_lower_pp",
+                         "lift_ci_upper_pp", "Signal"]
+        st.dataframe(available[evidence_cols], hide_index=True, width="stretch")
+        st.caption("A lower interval bound above zero with at least 30 holdouts is an exploratory signal—not proof of isolated causal impact. This is not a new or prospective controlled test.")
+
+elif page == "07  Data quality":
     section(
         "Do the reported totals reconcile?",
         "Aggregate reconciliation checks across the currently loaded exports.",
         "Data quality",
     )
-    def check_row(name, observed, expected, tolerance=.10):
+    def check_row(name, explanation, observed, expected, tolerance=.10):
         gap = abs(float(observed) - float(expected))
-        return {"Check": name, "Status": "PASS" if gap <= tolerance else "REVIEW", "Difference": gap}
+        return {
+            "Check": name, "Plain-English explanation": explanation,
+            "Status": "PASS" if gap <= tolerance else "REVIEW", "Difference": gap,
+        }
 
     checks = [
-        check_row("Campaign count: status file vs portfolio", len(campaign_status), total_campaigns, 0),
-        check_row("Campaign cost: status file vs portfolio", campaign_status["cost"].sum(), total_cost),
-        check_row("Channel cost vs portfolio", channels["spend"].sum(), total_cost),
-        check_row("Monthly cost vs portfolio", monthly["spend"].sum(), total_cost),
-        check_row("Month-channel cost vs monthly report", monthly_channel["spend"].sum(), monthly["spend"].sum()),
+        check_row("Campaign count: status file vs portfolio",
+                  "Does the number of campaigns in the campaign-status export match the portfolio total of 112?",
+                  len(campaign_status), total_campaigns, 0),
+        check_row("Campaign cost: status file vs portfolio",
+                  "Does adding up individual campaign costs produce the same total as the portfolio KPI?",
+                  campaign_status["cost"].sum(), total_cost),
+        check_row("Channel cost vs portfolio",
+                  "Does the combined cost of Email, SMS, Paid Social and Display equal the portfolio cost?",
+                  channels["spend"].sum(), total_cost),
+        check_row("Monthly cost vs portfolio",
+                  "Does adding up all monthly campaign costs equal the portfolio cost?",
+                  monthly["spend"].sum(), total_cost),
+        check_row("Month-channel cost vs monthly report",
+                  "Does the sum of channel costs within each month agree with that month's reported total?",
+                  monthly_channel["spend"].sum(), monthly["spend"].sum()),
     ]
     order_rows = channels[channels["campaign_orders"] > 0]
     if not order_rows.empty:
         calculated = order_rows["spend"] / order_rows["campaign_orders"]
         checks.append(check_row(
             "Cost / tagged order: largest channel-level rounding gap",
-            (calculated - order_rows["cost_per_order"]).abs().max(), 0, .05,
+            "Does the displayed cost-per-order figure agree with cost divided by tagged orders, allowing for rounding?",
+            (calculated - order_rows["cost_per_order"]).abs().max(), 0, .005,
         ))
     quality = pd.DataFrame(checks)
     q1, q2, q3 = st.columns(3)
@@ -762,15 +1033,41 @@ elif page == "05  Data quality":
     fig.update_yaxes(dtick=1, range=[0, max(1, len(quality)) + 1])
     st.plotly_chart(chart_style(fig, 285), width="stretch")
     st.subheader("Check-by-check evidence")
-    st.dataframe(
-        quality, hide_index=True, width="stretch",
-        column_config={"Difference": st.column_config.NumberColumn(format="%.4f")},
+    row_html = "".join(
+        "<tr>"
+        f"<td>{escape(str(row['Check']))}</td>"
+        f"<td>{escape(str(row['Plain-English explanation']))}</td>"
+        f"<td><span class={'ci-pass' if row['Status'] == 'PASS' else 'ci-review'}>"
+        f"{escape(str(row['Status']))}</span></td>"
+        f"<td style='text-align:right;font-variant-numeric:tabular-nums'>"
+        f"{float(row['Difference']):.4f}</td>"
+        "</tr>"
+        for _, row in quality.iterrows()
+    )
+    st.markdown(
+        '<div class="ci-check-wrap"><table class="ci-check-table">'
+        '<thead><tr><th>Check</th><th>Plain-English explanation</th>'
+        '<th>Result</th><th>Difference</th></tr></thead>'
+        f'<tbody>{row_html}</tbody></table></div>',
+        unsafe_allow_html=True,
+    )
+    st.download_button("Download check-by-check evidence CSV",
+                       quality.to_csv(index=False).encode("utf-8"),
+                       file_name="campaign_quality_checks.csv", mime="text/csv")
+    st.info(
+        "**What these results establish:** Summary totals agree across the six comparisons "
+        "above, within the stated tolerances. **What they do not establish:** Whether every "
+        "individual customer had valid consent at send time, whether each send matches its "
+        "approved audience, whether a message was delivered, or whether a holdout experiment "
+        "isolated the campaign's effect. These require different, record-level checks."
     )
     st.caption(
-        "These are aggregate reconciliation checks only. They do not establish consent compliance, "
-        "send-level matching or experiment validity. Counts shown on the separate reference console "
-        "must be reproduced from its underlying queries before reuse here."
+        "The separate Campaign Delivery Console displays other checks and flagged-record "
+        "counts. They are not included in this dashboard's six-check result because we have "
+        "not independently reproduced and verified those results from their underlying queries."
     )
+    if st.button("How to read these checks ↗", key="quality_guide", type="tertiary"):
+        show_data_guide()
 
 st.divider()
 st.caption(
