@@ -7,6 +7,7 @@ For Streamlit Community Cloud, save this file as app.py at the repository root.
 """
 from pathlib import Path
 from html import escape
+from decisions_page import render_decisions
 
 import pandas as pd
 import plotly.express as px
@@ -473,11 +474,14 @@ def show_data_guide():
 NAV_PAGES = [
     "01  Overview", "02  Trend", "03  Channel economics",
     "04  Audience & eligibility", "05  Customer priorities",
-    "06  Observed lift", "07  Data quality",
+    "06  Observed lift", "07  Decisions", "08  Data quality",
 ]
-# Migrate the previous navigation value when this version is first loaded.
-if st.session_state.get("workspace_page") == "05  Data quality":
-    st.session_state["workspace_page"] = "07  Data quality"
+# Preserve the selected page when upgrading from an earlier version.
+if st.session_state.get("workspace_page") in {
+    "05  Data quality",
+    "07  Data quality",
+}:
+    st.session_state["workspace_page"] = "08  Data quality"
 
 
 with st.sidebar:
@@ -1116,6 +1120,25 @@ elif page == "06  Observed lift":
                          "lift_ci_upper_pp", "Signal"]
         st.dataframe(available[evidence_cols], hide_index=True, width="stretch")
         st.caption("A lower interval bound above zero with at least 30 holdouts is an exploratory signal—not proof of isolated causal impact. This is not a new or prospective controlled test.")
+
+# --------------------------------------------------
+# 07. CAMPAIGN DECISIONS
+# --------------------------------------------------
+
+elif page == "07  Decisions":
+    render_decisions()
+
+
+# --------------------------------------------------
+# 08. DATA QUALITY
+# --------------------------------------------------
+
+elif page == "08  Data quality":
+    section(
+        "Do the reported totals reconcile?",
+        "Aggregate reconciliation checks across the currently loaded exports.",
+        "Data quality",
+    )
 
 elif page == "07  Data quality":
     section(
