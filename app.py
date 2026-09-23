@@ -249,6 +249,110 @@ def chart_style(fig, height=410):
     return fig
 
 
+# --------------------------------------------------
+# Historical conversion comparison (not a causal lift estimate).
+# Use campaign_decision_queue.csv, not campaign-tagged revenue or the
+# audience funnel's counts, as the source of conversion denominators.
+# --------------------------------------------------
+COMPARISON_FIELDS = (
+    "campaign_id", "treated_n", "treated_conversions",
+    "control_n", "control_conversions",
+)
+
+
+def prepare_conversion_records(source):
+    """Retain one complete, logically valid treatment/control row per campaign.
+
+    Return (usable_rows, excluded_row_count, duplicate_campaign_count).
+    Duplicate campaign IDs are excluded rather than silently double-counted.
+    """
+    if source is None or not set(COMPARISON_FIELDS).issubset(source.columns):
+        return pd.DataFrame(columns=COMPARISON_FIELDS), 0, 0
+
+    df = source.copy()
+    for field in COMPARISON_FIELDS:
+        df[field] = pd.to_numeric(df[field], errors="coerce")
+        df[field] = df[field].replace([float("inf"), -float("inf")], float("nan"))
+
+    duplicates = df["campaign_id"].notna() & df.duplicated("campaign_id", keep=False)
+    duplicate_ids = int(df.loc[duplicates, "campaign_id"].nunique())
+    numeric = list(COMPARISON_FIELDS)
+    valid = (
+        df[numeric].notna().all(axis=1)
+        & (df["treated_n"] > 0)
+        & (df["control_n"] > 0)
+        & (df["treated_conversions"] >= 0)
+        & (df["control_conversions"] >= 0)
+        & (df["treated_conversions"] <= df["treated_n"])
+        & (df["control_conversions"] <= df["control_n"])
+        & (df[numeric].mod(1) == 0).all(axis=1)
+        & ~duplicates
+    )
+    return df.loc[valid].copy(), int((~valid).sum()), duplicate_ids
+
+
+def show_conversion_comparison(records, excluded=0, duplicate_ids=0):
+    """Show pooled, denominator-weighted historical conversion rates."""
+    if records.empty:
+        st.info("No complete, valid treatment/holdout conversion counts are available for this selection.")
+        return
+
+    treated_n = int(records["treated_n"].sum())
+    treated_conversions = int(records["treated_conversions"].sum())
+    control_n = int(records["control_n"].sum())
+    control_conversions = int(records["control_conversions"].sum())
+    treatment_rate = 100 * treated_conversions / treated_n
+    control_rate = 100 * control_conversions / control_n
+    observed_difference = treatment_rate - control_rate
+
+    a, b, c = st.columns(3)
+    a.metric("Recorded-send conversion", f"{treatment_rate:.2f}%")
+    b.metric("Holdout conversion", f"{control_rate:.2f}%")
+    c.metric("Observed rate difference", f"{observed_difference:+.2f} pp")
+
+    comparison = pd.DataFrame({
+        "Group": ["Recorded-send group", "Control holdout"],
+        "Conversion rate (%)": [treatment_rate, control_rate],
+        "Conversions": [treated_conversions, control_conversions],
+        "Customer–campaign records": [treated_n, control_n],
+    })
+    fig = px.bar(
+        comparison, x="Conversion rate (%)", y="Group", color="Group",
+        orientation="h", text="Conversion rate (%)",
+        custom_data=["Conversions", "Customer–campaign records"],
+        color_discrete_map={"Recorded-send group": TEAL, "Control holdout": PURPLE},
+    )
+    fig.update_traces(
+        texttemplate="%{x:.2f}%", textposition="outside", cliponaxis=False,
+        hovertemplate=("%{y}<br>Conversion rate: %{x:.2f}%"
+                       "<br>Conversions: %{customdata[0]:,.0f}"
+                       "<br>Records evaluated: %{customdata[1]:,.0f}<extra></extra>"),
+    )
+    fig.update_layout(showlegend=False, yaxis_title="", xaxis_title="Conversion rate (%)")
+    fig.update_yaxes(autorange="reversed")
+    fig.update_xaxes(range=[0, max(treatment_rate, control_rate, 0.1) * 1.28], ticksuffix="%")
+    st.plotly_chart(chart_style(fig, 265), width="stretch")
+    st.caption(
+        f"{treated_conversions:,} conversions / {treated_n:,} recorded-send records; "
+        f"{control_conversions:,} / {control_n:,} holdout records. "
+        f"Pooled over {len(records):,} campaigns with complete, valid comparison counts. "
+        "Rates use summed conversions ÷ summed records, not an average of campaign percentages."
+    )
+    if excluded:
+        st.warning(
+            f"{excluded:,} export row(s) were excluded from the comparison because of "
+            "missing or invalid counts or duplicate campaign IDs. "
+            + (f"{duplicate_ids:,} campaign ID(s) had duplicates. " if duplicate_ids else "")
+            + "Review the underlying export before interpreting the pooled figures."
+        )
+    st.info(
+        "The holdout group could purchase without receiving its selected campaign, but may "
+        "have received other campaigns. Customers can appear in multiple campaigns. "
+        "This is an exploratory, pooled conversion-rate comparison—not an isolated causal "
+        "estimate, a pooled confidence interval, or a measure of incremental revenue."
+    )
+
+
 def section(title, subtitle, eyebrow):
     st.markdown(f'<div class="ci-eyebrow">{eyebrow}</div>', unsafe_allow_html=True)
     st.title(title)
@@ -337,7 +441,15 @@ def show_data_guide():
         "- **PASS / REVIEW:** A specified validation result under a stated tolerance; "
         "not certification of the entire database.\n"
         "- **Data-quality difference:** Absolute difference between the two quantities "
-        "compared; 0.0046 in the unit-cost check is below half a cent of display rounding."
+        "compared; 0.0046 in the unit-cost check is below half a cent of display rounding.\n"
+        "- **Recorded-send conversion rate:** Evaluated customer–campaign records with at "
+        "least one order in the original 11-calendar-date observation window ÷ evaluated "
+        "recorded-send records.\n"
+        "- **Holdout conversion rate:** The corresponding rate among records held out of "
+        "their selected campaign; not necessarily free of exposure to other campaigns.\n"
+        "- **Observed rate difference (pp):** Recorded-send conversion rate minus holdout "
+        "conversion rate. This is descriptive when pooled across overlapping campaigns, "
+        "not an incremental-revenue estimate."
     )
     st.markdown("### Simulation limitations")
     st.write(
@@ -539,6 +651,22 @@ if page == "01  Overview":
             st.warning(f"Audience totals do not reconcile: candidates {cand:,}; outcomes {audience_total:,}.")
         st.button("Review audience →", key="overview_audience_link", type="tertiary",
                   on_click=navigate_to, args=("04  Audience & eligibility",))
+
+    st.markdown(" ")
+    with st.container(border=True):
+        st.markdown('<div class="ci-panel-mark">CAMPAIGN EFFECTIVENESS</div>', unsafe_allow_html=True)
+        st.subheader("Would customers have purchased without this campaign?")
+        st.caption(
+            "Historical 11-calendar-date conversion comparison: recorded-send group versus "
+            "the group held out from its selected campaign."
+        )
+        if lift_data is None:
+            st.info("Add campaign_decision_queue.csv to powerbi_exports to see the observed conversion comparison.")
+        else:
+            overview_records, overview_excluded, overview_duplicates = prepare_conversion_records(lift_data)
+            show_conversion_comparison(overview_records, overview_excluded, overview_duplicates)
+            st.button("Explore campaign-level lift and uncertainty →", key="overview_conversion_link",
+                      type="tertiary", on_click=navigate_to, args=("06  Observed lift",))
 
     st.markdown(" ")
     with st.container(border=True):
@@ -924,8 +1052,8 @@ elif page == "05  Customer priorities":
 
 elif page == "06  Observed lift":
     section(
-        "Would those purchases have happened anyway?",
-        "Review exploratory sent-versus-holdout estimates before interpreting tagged revenue as additional sales.",
+        "Would customers have purchased without this campaign?",
+        "Compare historical recorded-send and holdout conversion rates, then inspect uncertainty.",
         "Campaign effectiveness",
     )
     st.warning("This page reads precomputed historical estimates, not the result of a new randomised Email reallocation test. Overlapping campaign exposure and unadjusted comparisons limit causal interpretation.")
@@ -933,6 +1061,20 @@ elif page == "06  Observed lift":
         st.warning("The campaign_decision_queue.csv export is not available. Add it to powerbi_exports to view this page.")
     else:
         lv = lift_data.copy()
+        selected_lift_channel = st.selectbox(
+            "Channel", ["All channels"] + sorted(lv["channel"].dropna().unique().tolist()),
+            key="lift_filter_channel",
+        )
+        if selected_lift_channel != "All channels":
+            lv = lv[lv["channel"] == selected_lift_channel].copy()
+
+        with st.container(border=True):
+            st.markdown('<div class="ci-panel-mark">OBSERVED CONVERSION COMPARISON</div>',
+                        unsafe_allow_html=True)
+            st.subheader("Would customers have purchased without this campaign?")
+            records, excluded_rows, duplicate_ids = prepare_conversion_records(lv)
+            show_conversion_comparison(records, excluded_rows, duplicate_ids)
+
         numeric_fields = ["estimated_lift_pp", "lift_ci_lower_pp", "lift_ci_upper_pp", "treated_n",
                           "treated_conversions", "control_n", "control_conversions"]
         for field in numeric_fields:
@@ -942,13 +1084,10 @@ elif page == "06  Observed lift":
             lambda r: "Exploratory positive signal" if r["control_n"] >= 30 and r["lift_ci_lower_pp"] > 0
             else "Inconclusive / review", axis=1)
         m1, m2, m3 = st.columns(3)
-        m1.metric("Campaigns in export", f"{len(lv):,}")
+        m1.metric("Campaigns in selection", f"{len(lv):,}")
         m2.metric("Estimates with intervals", f"{len(available):,}")
         m3.metric("Exploratory positive signals",
                   f"{int((available['Signal'] == 'Exploratory positive signal').sum()):,}")
-        selected_lift_channel = st.selectbox("Channel", ["All channels"] + sorted(available["channel"].dropna().unique().tolist()), key="lift_filter_channel")
-        if selected_lift_channel != "All channels":
-            available = available[available["channel"] == selected_lift_channel].copy()
         st.subheader("Estimated conversion-rate difference and 95% interval")
         st.caption("Percentage points (pp). The interval crossing zero is not evidence of a positive difference at this exploratory threshold.")
         display = available.sort_values("estimated_lift_pp", ascending=False).head(12).copy()
