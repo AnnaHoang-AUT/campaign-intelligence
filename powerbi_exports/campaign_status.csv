@@ -1,0 +1,113 @@
+campaign_id,campaign_name,channel,start_date,end_date,cost,campaign_status
+1,Retention - Email - Jan 2024,Email,2024-01-01,2024-01-08,422.03,Completed
+2,Acquisition - SMS - Jan 2024,SMS,2024-01-01,2024-01-11,737.63,Completed
+3,Acquisition - Paid Social - Jan 2024,Paid Social,2024-01-01,2024-01-09,6206.18,Completed
+4,Winback - Display - Jan 2024,Display,2024-01-01,2024-01-08,4256.0,Completed
+5,Retention - Email - Jan 2024,Email,2024-01-22,2024-01-28,448.39,Completed
+6,Winback - SMS - Jan 2024,SMS,2024-01-22,2024-01-31,860.93,Completed
+7,Acquisition - Paid Social - Jan 2024,Paid Social,2024-01-22,2024-01-27,6896.76,Completed
+8,Retention - Display - Jan 2024,Display,2024-01-22,2024-02-01,3319.15,Completed
+9,Cross-sell - Email - Feb 2024,Email,2024-02-12,2024-02-23,477.07,Completed
+10,Winback - SMS - Feb 2024,SMS,2024-02-12,2024-02-25,1259.18,Completed
+11,Acquisition - Paid Social - Feb 2024,Paid Social,2024-02-12,2024-02-26,6865.69,Completed
+12,Cross-sell - Display - Feb 2024,Display,2024-02-12,2024-02-18,4968.0,Completed
+13,Cross-sell - Email - Mar 2024,Email,2024-03-04,2024-03-09,517.01,Completed
+14,Retention - SMS - Mar 2024,SMS,2024-03-04,2024-03-18,1074.89,Completed
+15,Winback - Paid Social - Mar 2024,Paid Social,2024-03-04,2024-03-13,4797.33,Completed
+16,Acquisition - Display - Mar 2024,Display,2024-03-04,2024-03-13,3190.12,Completed
+17,Retention - Email - Mar 2024,Email,2024-03-25,2024-04-02,308.6,Completed
+18,Winback - SMS - Mar 2024,SMS,2024-03-25,2024-04-02,1022.49,Completed
+19,Retention - Paid Social - Mar 2024,Paid Social,2024-03-25,2024-04-07,5956.74,Completed
+20,Retention - Display - Mar 2024,Display,2024-03-25,2024-04-08,5924.59,Completed
+21,Cross-sell - Email - Apr 2024,Email,2024-04-15,2024-04-26,423.82,Completed
+22,Acquisition - SMS - Apr 2024,SMS,2024-04-15,2024-04-25,645.05,Completed
+23,Cross-sell - Paid Social - Apr 2024,Paid Social,2024-04-15,2024-04-29,8009.73,Completed
+24,Retention - Display - Apr 2024,Display,2024-04-15,2024-04-23,3998.03,Completed
+25,Acquisition - Email - May 2024,Email,2024-05-06,2024-05-16,556.22,Completed
+26,Winback - SMS - May 2024,SMS,2024-05-06,2024-05-15,936.05,Completed
+27,Acquisition - Paid Social - May 2024,Paid Social,2024-05-06,2024-05-14,4927.47,Completed
+28,Retention - Display - May 2024,Display,2024-05-06,2024-05-15,3666.76,Completed
+29,Acquisition - Email - May 2024,Email,2024-05-27,2024-06-09,485.06,Completed
+30,Cross-sell - SMS - May 2024,SMS,2024-05-27,2024-06-10,790.75,Completed
+31,Retention - Paid Social - May 2024,Paid Social,2024-05-27,2024-06-03,5455.72,Completed
+32,Retention - Display - May 2024,Display,2024-05-27,2024-06-05,6233.74,Completed
+33,Retention - Email - Jun 2024,Email,2024-06-17,2024-06-24,289.39,Completed
+34,Acquisition - SMS - Jun 2024,SMS,2024-06-17,2024-06-24,944.98,Completed
+35,Winback - Paid Social - Jun 2024,Paid Social,2024-06-17,2024-06-25,5603.95,Completed
+36,Winback - Display - Jun 2024,Display,2024-06-17,2024-06-30,3166.44,Completed
+37,Acquisition - Email - Jul 2024,Email,2024-07-08,2024-07-14,330.59,Completed
+38,Winback - SMS - Jul 2024,SMS,2024-07-08,2024-07-21,1145.63,Completed
+39,Cross-sell - Paid Social - Jul 2024,Paid Social,2024-07-08,2024-07-15,7695.62,Completed
+40,Acquisition - Display - Jul 2024,Display,2024-07-08,2024-07-14,3731.56,Completed
+41,Winback - Email - Jul 2024,Email,2024-07-29,2024-08-12,468.74,Completed
+42,Winback - SMS - Jul 2024,SMS,2024-07-29,2024-08-04,1179.29,Completed
+43,Acquisition - Paid Social - Jul 2024,Paid Social,2024-07-29,2024-08-12,6537.47,Completed
+44,Winback - Display - Jul 2024,Display,2024-07-29,2024-08-04,5487.95,Completed
+45,Acquisition - Email - Aug 2024,Email,2024-08-19,2024-09-01,436.8,Completed
+46,Acquisition - SMS - Aug 2024,SMS,2024-08-19,2024-08-30,786.41,Completed
+47,Cross-sell - Paid Social - Aug 2024,Paid Social,2024-08-19,2024-08-26,5241.83,Completed
+48,Acquisition - Display - Aug 2024,Display,2024-08-19,2024-08-31,5527.3,Completed
+49,Retention - Email - Sep 2024,Email,2024-09-09,2024-09-21,459.73,Completed
+50,Retention - SMS - Sep 2024,SMS,2024-09-09,2024-09-14,761.2,Completed
+51,Cross-sell - Paid Social - Sep 2024,Paid Social,2024-09-09,2024-09-23,5097.88,Completed
+52,Cross-sell - Display - Sep 2024,Display,2024-09-09,2024-09-21,4228.35,Completed
+53,Retention - Email - Sep 2024,Email,2024-09-30,2024-10-12,462.77,Completed
+54,Retention - SMS - Sep 2024,SMS,2024-09-30,2024-10-05,909.17,Completed
+55,Retention - Paid Social - Sep 2024,Paid Social,2024-09-30,2024-10-13,4538.75,Completed
+56,Retention - Display - Sep 2024,Display,2024-09-30,2024-10-10,6024.58,Completed
+57,Cross-sell - Email - Oct 2024,Email,2024-10-21,2024-10-29,538.85,Completed
+58,Cross-sell - SMS - Oct 2024,SMS,2024-10-21,2024-11-01,1077.49,Completed
+59,Acquisition - Paid Social - Oct 2024,Paid Social,2024-10-21,2024-11-03,7522.52,Completed
+60,Retention - Display - Oct 2024,Display,2024-10-21,2024-10-26,4981.47,Completed
+61,Retention - Email - Nov 2024,Email,2024-11-11,2024-11-17,304.2,Completed
+62,Acquisition - SMS - Nov 2024,SMS,2024-11-11,2024-11-16,1014.31,Completed
+63,Retention - Paid Social - Nov 2024,Paid Social,2024-11-11,2024-11-16,5865.12,Completed
+64,Acquisition - Display - Nov 2024,Display,2024-11-11,2024-11-16,4271.42,Completed
+65,Retention - Email - Dec 2024,Email,2024-12-02,2024-12-10,506.24,Completed
+66,Acquisition - SMS - Dec 2024,SMS,2024-12-02,2024-12-11,766.56,Completed
+67,Retention - Paid Social - Dec 2024,Paid Social,2024-12-02,2024-12-10,7888.63,Completed
+68,Retention - Display - Dec 2024,Display,2024-12-02,2024-12-14,6046.71,Completed
+69,Retention - Email - Dec 2024,Email,2024-12-23,2025-01-03,381.03,Completed
+70,Retention - SMS - Dec 2024,SMS,2024-12-23,2025-01-05,1103.86,Completed
+71,Retention - Paid Social - Dec 2024,Paid Social,2024-12-23,2024-12-31,7487.41,Completed
+72,Winback - Display - Dec 2024,Display,2024-12-23,2025-01-02,3894.49,Completed
+73,Acquisition - Email - Jan 2025,Email,2025-01-13,2025-01-23,483.81,Completed
+74,Retention - SMS - Jan 2025,SMS,2025-01-13,2025-01-18,858.37,Completed
+75,Acquisition - Paid Social - Jan 2025,Paid Social,2025-01-13,2025-01-21,6898.85,Completed
+76,Acquisition - Display - Jan 2025,Display,2025-01-13,2025-01-19,4876.79,Completed
+77,Retention - Email - Feb 2025,Email,2025-02-03,2025-02-15,511.27,Completed
+78,Cross-sell - SMS - Feb 2025,SMS,2025-02-03,2025-02-14,1226.46,Completed
+79,Retention - Paid Social - Feb 2025,Paid Social,2025-02-03,2025-02-11,6901.46,Completed
+80,Retention - Display - Feb 2025,Display,2025-02-03,2025-02-15,4999.78,Completed
+81,Winback - Email - Feb 2025,Email,2025-02-24,2025-03-10,343.45,Completed
+82,Acquisition - SMS - Feb 2025,SMS,2025-02-24,2025-03-09,765.99,Completed
+83,Winback - Paid Social - Feb 2025,Paid Social,2025-02-24,2025-03-07,6904.41,Completed
+84,Winback - Display - Feb 2025,Display,2025-02-24,2025-03-06,3791.49,Completed
+85,Winback - Email - Mar 2025,Email,2025-03-17,2025-03-31,434.79,Completed
+86,Acquisition - SMS - Mar 2025,SMS,2025-03-17,2025-03-23,782.85,Completed
+87,Retention - Paid Social - Mar 2025,Paid Social,2025-03-17,2025-03-23,5798.43,Completed
+88,Winback - Display - Mar 2025,Display,2025-03-17,2025-03-31,5828.74,Completed
+89,Retention - Email - Apr 2025,Email,2025-04-07,2025-04-17,471.79,Completed
+90,Acquisition - SMS - Apr 2025,SMS,2025-04-07,2025-04-20,924.96,Completed
+91,Cross-sell - Paid Social - Apr 2025,Paid Social,2025-04-07,2025-04-21,7161.88,Completed
+92,Retention - Display - Apr 2025,Display,2025-04-07,2025-04-16,3944.39,Completed
+93,Winback - Email - Apr 2025,Email,2025-04-28,2025-05-09,470.91,Completed
+94,Cross-sell - SMS - Apr 2025,SMS,2025-04-28,2025-05-07,1254.9,Completed
+95,Retention - Paid Social - Apr 2025,Paid Social,2025-04-28,2025-05-10,5501.94,Completed
+96,Retention - Display - Apr 2025,Display,2025-04-28,2025-05-08,5779.84,Completed
+97,Acquisition - Email - May 2025,Email,2025-05-19,2025-05-28,399.19,Completed
+98,Retention - SMS - May 2025,SMS,2025-05-19,2025-05-24,647.86,Completed
+99,Retention - Paid Social - May 2025,Paid Social,2025-05-19,2025-05-31,8296.37,Completed
+100,Winback - Display - May 2025,Display,2025-05-19,2025-05-25,5163.25,Completed
+101,Acquisition - Email - Jun 2025,Email,2025-06-09,2025-06-16,375.07,Completed
+102,Acquisition - SMS - Jun 2025,SMS,2025-06-09,2025-06-14,687.37,Completed
+103,Retention - Paid Social - Jun 2025,Paid Social,2025-06-09,2025-06-20,8121.62,Completed
+104,Retention - Display - Jun 2025,Display,2025-06-09,2025-06-23,4674.2,Completed
+105,Retention - Email - Jun 2025,Email,2025-06-30,2025-07-11,341.83,Completed
+106,Retention - SMS - Jun 2025,SMS,2025-06-30,2025-07-14,1034.07,Completed
+107,Winback - Paid Social - Jun 2025,Paid Social,2025-06-30,2025-07-06,5182.81,Completed
+108,Acquisition - Display - Jun 2025,Display,2025-06-30,2025-07-05,3438.44,Completed
+109,Winback - Email - Jul 2025,Email,2025-07-21,2025-07-28,467.83,Completed
+110,Acquisition - SMS - Jul 2025,SMS,2025-07-21,2025-08-01,1257.16,Completed
+111,Cross-sell - Paid Social - Jul 2025,Paid Social,2025-07-21,2025-07-31,4880.62,Completed
+112,Acquisition - Display - Jul 2025,Display,2025-07-21,2025-07-30,4835.2,Completed

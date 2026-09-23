@@ -1,0 +1,13 @@
+﻿report_section,report_title,check_name,failed_count,result
+5.1,Duplicate customer-campaign audience records,Duplicate audience selections,0,PASS
+5.2,Audience status and suppression-reason consistency,Invalid status/reason combinations,0,PASS
+5.3,Sends without sent audience status,Sends without sent audience status,0,PASS
+5.4,Sent audience count versus actual send count,Sent audience versus send mismatch,0,PASS
+5.5,Events before their associated send,Events before send date,0,PASS
+5.6,"Invalid campaign, send, order or customer dates",Invalid date relationships,0,PASS
+5.7,Invalid financial values,Invalid financial values,0,PASS
+5.8,Consent or opt-out breaches at send time,Consent or opt-out breach at send time,10,REVIEW
+5.9,Duplicate sends to one customer within one campaign,Duplicate customer-campaign sends,0,PASS
+6.1,Audience reconciliation gap,Audience reconciliation gap,0,PASS
+6.2,Orphan records with missing parents,Orphan records,0,PASS
+6.3,Experiment-quality review: sparse controls and cross-campaign exposure,Experiment design requires review,101,REVIEW

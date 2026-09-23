@@ -1,0 +1,16 @@
+﻿report_section,report_title,campaign_id,campaign_name,channel,objective,engagement_status,sends,opens,clicks,open_rate_pct,channel_open_benchmark_pct,open_rate_gap_pp,click_to_open_rate_pct,channel_click_to_open_benchmark_pct,click_to_open_gap_pp
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,8,Retention - Display - Jan 2024,Display,Retention,Needs attention,289,20,0,6.92,7.85,-0.93,0.0,7.28,-7.28
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,14,Retention - SMS - Mar 2024,SMS,Retention,Needs attention,158,70,22,44.3,50.52,-6.22,31.43,29.29,2.13
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,38,Winback - SMS - Jul 2024,SMS,Winback,Needs attention,360,179,42,49.72,50.52,-0.8,23.46,29.29,-5.83
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,88,Winback - Display - Mar 2025,Display,Winback,Needs attention,557,43,1,7.72,7.85,-0.13,2.33,7.28,-4.96
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,22,Acquisition - SMS - Apr 2024,SMS,Acquisition,Needs attention,273,135,33,49.45,50.52,-1.07,24.44,29.29,-4.85
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,19,Retention - Paid Social - Mar 2024,Paid Social,Retention,Needs attention,556,85,6,15.29,16.41,-1.12,7.06,11.55,-4.49
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,102,Acquisition - SMS - Jun 2025,SMS,Acquisition,Needs attention,680,315,89,46.32,50.52,-4.2,28.25,29.29,-1.04
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,28,Retention - Display - May 2024,Display,Retention,Needs attention,1361,93,3,6.83,7.85,-1.02,3.23,7.28,-4.06
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,107,Winback - Paid Social - Jun 2025,Paid Social,Winback,Needs attention,1149,184,14,16.01,16.41,-0.39,7.61,11.55,-3.94
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,36,Winback - Display - Jun 2024,Display,Winback,Needs attention,366,29,1,7.92,7.85,0.07,3.45,7.28,-3.83
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,39,Cross-sell - Paid Social - Jul 2024,Paid Social,Cross-sell,Needs attention,1106,168,13,15.19,16.41,-1.22,7.74,11.55,-3.81
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,62,Acquisition - SMS - Nov 2024,SMS,Acquisition,Needs attention,539,252,72,46.75,50.52,-3.77,28.57,29.29,-0.72
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,52,Cross-sell - Display - Sep 2024,Display,Cross-sell,Needs attention,1025,55,2,5.37,7.85,-2.49,3.64,7.28,-3.65
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,4,Winback - Display - Jan 2024,Display,Winback,Needs attention,259,27,1,10.42,7.85,2.57,3.7,7.28,-3.58
+1.1,WHICH CAMPAIGNS REQUIRE ENGAGEMENT ATTENTION?,18,Winback - SMS - Mar 2024,SMS,Winback,Needs attention,372,176,51,47.31,50.52,-3.21,28.98,29.29,-0.32

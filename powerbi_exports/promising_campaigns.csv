@@ -1,0 +1,11 @@
+﻿report_section,report_title,campaign_id,campaign_name,proposed_next_step,channel,objective,spend,roas,target_roas,estimated_lift_pp,lift_ci_lower_pp,lift_ci_upper_pp,treated_n,treated_conversions,control_n,control_conversions
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,57,Cross-sell - Email - Oct 2024,Repeat test before scaling,Email,Cross-sell,538.85,11.37,1.0,2.55,1.11,3.99,2468,90,274,3
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,109,Winback - Email - Jul 2025,Repeat test before scaling,Email,Winback,467.83,9.31,1.0,3.14,1.64,4.63,2036,82,225,2
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,41,Winback - Email - Jul 2024,Repeat test before scaling,Email,Winback,468.74,8.81,1.0,2.84,1.39,4.29,2180,81,228,2
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,77,Retention - Email - Feb 2025,Repeat test before scaling,Email,Retention,511.27,7.99,1.0,3.52,1.87,5.18,1800,81,205,2
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,81,Winback - Email - Feb 2025,Repeat test before scaling,Email,Winback,343.45,7.45,1.0,3.71,2.6,4.83,1104,41,126,0
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,5,Retention - Email - Jan 2024,Repeat test before scaling,Email,Retention,448.39,5.81,1.0,3.29,2.37,4.2,1460,48,161,0
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,1,Retention - Email - Jan 2024,Repeat test before scaling,Email,Retention,422.03,5.74,1.0,2.59,0.99,4.2,1381,45,150,1
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,70,Retention - SMS - Dec 2024,Repeat test before scaling,SMS,Retention,1103.86,3.37,1.0,4.6,2.2,7.0,1036,58,100,1
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,65,Retention - Email - Dec 2024,Repeat test before scaling,Email,Retention,506.24,3.08,1.0,2.23,0.19,4.28,962,30,113,1
+4.3,WHICH PROMISING CAMPAIGNS SHOULD WE LEARN FROM AND RE-TEST?,74,Retention - SMS - Jan 2025,Repeat test before scaling,SMS,Retention,858.37,2.54,1.0,7.35,5.29,9.42,612,45,58,0
