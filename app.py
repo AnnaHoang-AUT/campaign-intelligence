@@ -1139,13 +1139,6 @@ elif page == "08  Data quality":
         "Aggregate reconciliation checks across the currently loaded exports.",
         "Data quality",
     )
-
-elif page == "07  Data quality":
-    section(
-        "Do the reported totals reconcile?",
-        "Aggregate reconciliation checks across the currently loaded exports.",
-        "Data quality",
-    )
     def check_row(name, explanation, observed, expected, tolerance=.10):
         gap = abs(float(observed) - float(expected))
         return {
