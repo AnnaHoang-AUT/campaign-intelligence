@@ -106,8 +106,8 @@ python generate_data.py
 python run_queries.py
 ```
 
-## About me: [**Connect on LinkedIn ↗**](https://www.linkedin.com/in/anna-hoang-aut/)
+## About me
 
 I'm **Anna (Huong) Hoang**, a 12-year experience marketing professional with a Master of Analytics (First Class Honours), developing my career in Business Intelligence and data science. I enjoy work that connects careful technical analysis with an understanding of the real process behind the data—and makes the resulting evidence useful to the people making decisions.
 
-**Explore:** [Live dashboard](https://campaign-intelligence-annahoang.streamlit.app/), 
+**Explore:** [Live dashboard](https://campaign-intelligence-annahoang.streamlit.app/), [**Connect on LinkedIn ↗**](https://www.linkedin.com/in/anna-hoang-aut/)
