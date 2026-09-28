@@ -1,108 +1,113 @@
-# Campaign Intelligence: From Audience to Attribution
+# Campaign Intelligence: From Audience to Decisions
 
-**A SQL portfolio project built to demonstrate the difference between an analyst who reports campaign numbers and one who has actually run campaigns.**
+**An end-to-end marketing analytics and decision-support web application built with SQL, Python, pandas, Streamlit and Plotly.**
 
-10 years of managing campaigns means I don't just ask "what happened?" — I ask "was this audience even eligible to be targeted?", "would this revenue have happened anyway?", and "who should we target next?". This project is built around those questions, using a synthetic-but-realistic dataset (8,000 customers, 112 campaigns, ~450K rows across audience selection, sends, engagement and orders) modelled in SQLite.
+[**Explore the interactive web app ↗**](https://campaign-intelligence-annahoang.streamlit.app/), [**Connect on LinkedIn ↗**](https://www.linkedin.com/in/anna-hoang-aut/)
 
-## Why this project is different from a typical "SQL campaign analysis" portfolio piece
+> **Portfolio note:** This project uses synthetic data to demonstrate an end-to-end analytical workflow, from audience eligibility and campaign performance to measurement, data validation and business decisions. It does not represent results from a live client campaign.
 
-| Most portfolio projects | This project |
+## Why I built it
+
+My 12 years in marketing, including over 6 years in campaign delivery, have shaped how I approach data analysis.
+
+When clients want to understand how effective their campaigns were, I look beyond headline metrics such as reach, opens and revenue recorded after launch. I want to understand the full campaign journey: 
+  * What happened before the campaign went live? 
+  * Was the intended audience eligible and correctly selected? 
+  * If results fell short, where might the problem have occurred? 
+  * Did the campaign generate additional purchases, or might some customers have purchased anyway? 
+  * What can we learn from promising campaigns, and where should the next marketing dollars go?
+
+These questions inspired me to build Campaign Intelligence. I wanted to connect my practical understanding of campaign operations with the analytical and technical skills I developed through my Master of Analytics.
+
+The project reflects an approach I value: starting with the business problem, examining the underlying data carefully, investigating possible root causes, validating findings and translating them into practical, evidence-informed recommendations.
+
+## At a glance
+
+| Project scope | Details |
 |---|---|
-| Start from a clean "campaign results" table | Starts from a **candidate audience**, and models suppression, consent and control-group holdouts *before* a single send happens |
-| Report revenue "attributed to" a campaign at face value | Tests whether that revenue was **incremental** using a genuine test-vs-control design |
-| Pick one attribution model without saying so | Runs **three attribution models side by side** and shows how much they disagree |
-| Stop at "here are the numbers" | Ends every tier with a **recommendation** — a next audience, a budget shift, a suppression rule |
+| Data | Synthetic portfolio of **8,000 customers and 112 campaigns**, across Email, SMS, Paid Social and Display |
+| Database | **SQLite** with customer, campaign, audience-selection, send, event and order records |
+| Analysis | **SQL** for joins, aggregation, audience reconciliation, segmentation and campaign-level comparisons |
+| Application | **Python, pandas, Streamlit and Plotly** for data preparation and an interactive decision dashboard |
+| Delivery | Published CSV exports, **GitHub** version control and **Streamlit Community Cloud** deployment |
 
-## Schema
+## The questions the dashboard answers
 
+1. **Overview:** What do campaign cost, campaign-tagged revenue and channel performance tell us about the historical portfolio?
+2. **Trend:** How do recorded campaign costs and tagged ROAS vary by campaign launch month?
+3. **Channel economics:** How do channels compare on recorded cost, tagged orders and tagged ROAS?
+4. **Audience & eligibility:** How does the candidate audience reconcile to recorded sends, holdouts and suppressions? Which recorded exclusion reasons explain the gap?
+5. **Customer priorities:** Which historical purchasing segments may warrant closer attention, subject to fresh eligibility and consent checks?
+6. **Observed lift:** How do recorded-send and holdout conversion rates compare, and how uncertain are the campaign-level estimates?
+7. **Decisions:** Which campaigns warrant review, improved measurement or a controlled re-test? Which customer opportunities require an eligibility review?
+8. **Data quality:** Do the reported aggregate counts and costs reconcile across the published exports?
+
+The dashboard is designed as a **decision workspace**, not just a collection of charts. Each view connects the metric to its definition, an important limitation and a business question worth investigating.
+
+## Data model and workflow
+
+```text
+customers           Customer details, signup dates, consent and opt-out indicators
+campaigns           Channel, objective, dates and recorded cost
+audience_selection  Candidate customer–campaign records: sent, holdout or suppressed
+sends               Recorded campaign sends (not proof of delivery)
+events              Recorded engagement events, such as opens and clicks
+orders              Purchase records, revenue and any campaign ID tag
 ```
-customers            -- who they are, consent flags, opt-out status
-campaigns             -- channel, objective, cost, flight dates
-audience_selection    -- EVERY candidate per campaign: sent / suppressed (+reason) / control_holdout
-sends                  -- what was actually delivered
-events                  -- opens, clicks
-orders                   -- revenue, only campaign-tagged when the generator knows it was campaign-induced
-```
-Full DDL: [`schema.sql`](schema.sql). Data generator (documented, seeded, reproducible): [`generate_data.py`](generate_data.py). All analysis: [`queries.sql`](queries.sql).
 
-The `audience_selection` table is the piece most portfolio projects skip. It's a direct translation of the campaign-ops work I did for years: verifying consent, applying frequency caps, excluding recent purchasers, and reconciling the final send count against the candidate pool — the work a client or compliance stakeholder actually asks about before a campaign goes out.
+The audience-selection table matters to the way I approach the problem. It lets me investigate the journey **before** a send: candidate audience → eligibility and suppression decisions → recorded sends or holdouts. Counts across campaigns are *customer–campaign records*, not necessarily distinct customers. Historical contactability indicators do not replace a current permission or eligibility check.
 
----
+The analysis is generated from the SQLite project and published as CSV exports for the Streamlit app. The repository also includes the schema, synthetic-data generator and SQL analysis files: [`schema.sql`](schema.sql), [`generate_data.py`](generate_data.py) and [`queries.sql`](queries.sql).
 
-## Tier 1 — Baseline KPIs
-*(what any SQL-literate analyst can produce)*
+## Selected findings and how I interpret them
 
-Open/click/conversion rates by campaign, revenue and cost by channel. Necessary, but this is where most SQL portfolio projects stop.
+The current dashboard reports **$347,064 in recorded campaign cost** and approximately **$168,587 in campaign-tagged revenue** across 112 campaigns, equivalent to **0.49× portfolio tagged ROAS**. These are historical synthetic figures, not a profitability or causal-impact estimate.
 
-```
-channel      campaigns  total_cost   campaign_tagged_revenue
-Email             28    602,070          89,845
-SMS               28    510,739          33,403
-Paid Social       28  3,058,417          32,423
-Display           28    915,858          12,915
-```
-Read at face value, Paid Social looks competitive with SMS. It isn't — see Tier 3.
+| Channel | Campaigns | Recorded cost | Campaign-tagged revenue | Tagged ROAS |
+|---|---:|---:|---:|---:|
+| Email | 28 | $12,116 | $89,845 | 7.42× |
+| SMS | 28 | $26,456 | $33,403 | 1.26× |
+| Paid Social | 28 | $178,243 | $32,423 | 0.18× |
+| Display | 28 | $130,249 | $12,915 | 0.10× |
 
-## Tier 2 — Audience governance & segmentation
-*(the work before the send — the part a marketing-operations background actually changes)*
+These differences are a starting point for investigation, **not an automatic instruction to shift budget**. I would first check campaign objectives, audience composition, eligibility, cost allocation and measurement consistency, then use an appropriately designed test to evaluate potential incremental impact. The dashboard's **1.00× ROAS line is illustrative**: revenue equal to recorded campaign cost, before product costs or margin.
 
-**2.1 Audience reconciliation.** For every campaign, candidate pool → suppressed (by reason) → sent → control holdout. Example, Campaign #2: **2,800 candidates → only 272 sendable (9.7%)** once no-consent (517), frequency-cap (247) and opt-outs are removed. That's the number a stakeholder actually needs when a campaign under-delivers — not "the audience was small," but *why*.
+The observed-lift view compares conversion in the recorded-send and holdout groups over the original project's **11-calendar-date observation window** (campaign start through start + 10 days, inclusive). Campaign-level uncertainty is shown using **95% Newcombe intervals based on Wilson bounds**. An exploratory positive signal requires a lower interval bound above zero and at least 30 holdouts. Customers can occur in multiple campaigns and holdouts may have other campaign exposure, so these comparisons **do not prove isolated causal lift or incremental revenue**.
 
-**2.2 / 2.3 RFM segmentation**, built with `NTILE()` window functions rather than hardcoded thresholds, so it re-segments correctly as the customer base grows:
+The separate companion analysis explores **first-touch, last-touch and linear send-based attribution** over a 25-day lookback. Those *attributed* revenue figures are distinct from the Streamlit dashboard's *campaign-tagged* revenue figures; they should not be mixed or described as proof of causation.
 
-```
-segment                             customers   revenue   % of revenue   % of customers
-Core / steady                          1,725    140,973        31.5%          36.4%
-Champions                                908    133,694        29.9%          19.2%
-At-risk high-value (win back now)        569     81,218        18.2%          12.0%
-Lapsed / low-value                       882     53,012        11.9%          18.6%
-Recent, low-frequency (nurture)          651     38,334         8.6%          13.7%
-```
-The actionable read: **"At-risk high-value" is 12% of customers holding 18% of revenue** — a small, high-priority winback list, not a mass campaign.
+## Data quality and limitations
 
-## Tier 3 — Incrementality & attribution
-*(the difference between "revenue happened near this campaign" and "this campaign caused revenue")*
+The Data Quality page runs **six aggregate reconciliation checks** across campaign counts, portfolio cost, channel and monthly totals, and cost-per-tagged-order rounding. These are useful checks of reporting consistency, **not a complete audit** of send-level matching, consent compliance, experiment validity or data generation.
 
-**3.1 Test-vs-control incrementality.** Every campaign carries a ~10% holdout group logged in `audience_selection`. Comparing conversion rate of `sent` vs `control_holdout` within a 10-day window gives real causal lift, not a correlation:
+All data is synthetic; some generator assumptions can affect eligibility and channel comparisons. A send record does not guarantee delivery or viewing. Historical revenue is not customer lifetime value, and segment labels describe past behaviour rather than predicting future behaviour. Monthly spend groups each campaign's recorded cost by **launch month**, not the timing of actual cash expenditure.
 
-```
-campaign_id   treated_n   control_n   treated_conv%   control_conv%   incremental_lift(pts)
-74               612         58           7.68            0.00            7.68
-42               467         61           6.85            0.00            6.85
-70              1036        100           6.18            1.00            5.18
-```
-This is the check that protects budget: a campaign can show "revenue" in Tier 1 and still have near-zero incremental lift once you compare against people who weren't sent anything.
+## Tools and skills demonstrated
 
-**3.2 Attribution model comparison.** First-touch, last-touch and linear, computed side by side over a 25-day lookback:
+**SQL / SQLite:** relational schema, joins, CTEs and window functions (including `NTILE()`), segmentation, aggregation and reconciliation.  
+**Python / pandas:** data preparation, export handling and validation logic.  
+**Streamlit / Plotly:** interactive filtering, visualisation, metrics and decision-focused presentation.  
+**GitHub / Streamlit Community Cloud:** project documentation, version control and deployment.  
+**Analytical practice:** clear metric definitions, controlled-comparison interpretation, investigation of data gaps and communication of practical recommendations.
 
-```
-channel        first_touch   last_touch   linear
-Email             162,639      168,535    165,587
-Paid Social        81,098       79,560     80,329
-Display             59,641       49,216     54,429
-SMS                 45,653       51,720     48,686
-```
-**Display swings by ~$10K (59.6K → 49.2K) depending on the model.** That's the conversation most dashboards never surface: which model you pick changes which channel looks like it's working, so a channel decision needs to say which model it's using — not just report "revenue."
+## Run locally
 
-**3.3 Blended CAC / ROAS.** Once cost is brought in, Paid Social's Tier-1 revenue lead disappears — Email returns **0.17 ROAS vs Paid Social's 0.03-range**, at a fraction of the spend.
-
-## Tier 4 — Forward-looking recommendations
-*(so what do we do next campaign)*
-
-**4.1 Under-targeted lookalikes.** Customers who score like "Champions" on recency/frequency but have received ≤3 sends all-time — a ready-made audience for the next campaign, generated with a `LEFT JOIN` against send history rather than a manual list pull.
-
-**4.2 Budget reallocation.** Every channel × objective combination's ROAS against the blended average, with an explicit `Increase budget` / `Reduce or re-test` flag — Email Retention and Cross-sell justify more spend; Display Acquisition (0.01 ROAS) doesn't.
-
----
-
-## How to run it
+With Python installed, clone the repository and install the dashboard dependencies:
 
 ```bash
-python3 generate_data.py        # builds campaign_analytics.db (reproducible, seeded)
-python3 run_queries.py          # runs every labelled query in queries.sql and prints results
+pip install -r requirements.txt
+python -m streamlit run app.py
 ```
-No external services required — pure SQLite, pandas only used for pretty-printing results and generating the synthetic data.
 
-## What I'd say about this in an interview
+The dashboard reads the published files in `powerbi_exports/`. To rebuild the synthetic database and run the original SQL workflow, use the generator and query runner supplied in the repository:
 
-> "I built the audience-selection table first, before any results table, because that's the order the work actually happens in. The part I'm proudest of is the test-vs-control design — it's easy to show a campaign 'worked' by pointing at revenue near the send date; it's harder, and more useful to the business, to prove it wouldn't have happened anyway."
+```bash
+python generate_data.py
+python run_queries.py
+```
+
+## About me: [**Connect on LinkedIn ↗**](https://www.linkedin.com/in/anna-hoang-aut/)
+
+I'm **Anna (Huong) Hoang**, a 12-year experience marketing professional with a Master of Analytics (First Class Honours), developing my career in Business Intelligence and data science. I enjoy work that connects careful technical analysis with an understanding of the real process behind the data—and makes the resulting evidence useful to the people making decisions.
+
+**Explore:** [Live dashboard](https://campaign-intelligence-annahoang.streamlit.app/), 
